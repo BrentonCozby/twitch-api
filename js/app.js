@@ -2,31 +2,51 @@ var tbody = document.getElementById('tbody');
 
 document.getElementsByTagName('input')[0].checked = true;
 
-apiResponse.forEach(function(channel) {
-    if(channel._links) tbody.appendChild( makeRow(channel) );
-});
+$.ajax({
+        method: 'GET',
+        url: 'https://api.twitch.tv/kraken/streams/featured?',
+        data: {
+            client_id: '3nzcyd6qgb11u3ethqhymn37i11fyg',
+            stream_type: 'all',
+            limit: 20,
+            language: 'en'
+        },
+        datatype: 'jsonp',
+    })
+    .done(function(res) {
+        console.log(res);
+        res.featured.forEach(function(stream) {
+            tbody.appendChild(makeRow(stream));
+        });
+        addClickHandlers();
+    })
+    .fail(function(err) {
+        console.log(err);
+    });
 
 document.getElementById('tbody');
 
-function makeRow(channel) {
+function makeRow(stream) {
     var row = document.createElement('tr');
     var logo = 'http://i.imgur.com/3tkNHB6.png';
-    var displayName = channel.display_name;
+    var displayName = stream.title;
     var details = 'offline';
     var anchor = null;
 
-    if(channel.stream) {
-        logo = channel.stream.logo;
-        displayName = channel.stream.display_name;
-        details = channel.stream.status;
+    if (stream.stream) {
+        logo = stream.stream.channel.logo;
+        displayName = stream.stream.channel.display_name;
+        details = stream.stream.channel.status;
         row.classList.add('streaming');
 
-        var streamLink = channel.stream.url;
+        var streamLink = stream.stream.channel.url;
         anchor = document.createElement('a');
         anchor.setAttribute('href', streamLink);
         anchor.setAttribute('target', "_blank");
+        anchor.setAttribute('rel', "noopener");
+    } else {
+        row.classList.add('offline');
     }
-    else {row.classList.add('offline')}
 
     var logoEl = document.createElement('td');
     var img = document.createElement('img');
@@ -42,11 +62,10 @@ function makeRow(channel) {
     var detailsEl = document.createElement('td');
     var detailsText = document.createTextNode(details);
     detailsEl.classList.add('details');
-    if(anchor) {
+    if (anchor) {
         anchor.appendChild(detailsText);
         detailsEl.appendChild(anchor);
-    }
-    else {
+    } else {
         detailsEl.appendChild(detailsText);
     }
 
@@ -60,43 +79,43 @@ function makeRow(channel) {
 
 
 
-var _filters = document.getElementsByTagName('input');
-var filters = [];
+function addClickHandlers() {
+    var _filters = document.getElementsByTagName('input');
+    var filters = [];
 
-for(var i = 0, x = _filters.length; i < x; i++) {
-    filters.push(_filters[i]);
-}
-
-filters.forEach(function(filter) {
-    filter.nextElementSibling.addEventListener('click', function() {
-        filterStreams(this.htmlFor);
-    });
-});
-
-var _channels = document.getElementsByClassName('channel');
-var channels = [];
-
-for(var j = 0, x = _channels.length; j < x; j++) {
-    channels.push(_channels[j]);
-}
-
-function filterStreams(label) {
-    if(label === 'all') {
-        channels.forEach(function(channel) {
-            channel.classList.remove('hide');
-        });
+    for (var i = 0, x = _filters.length; i < x; i++) {
+        filters.push(_filters[i]);
     }
-    else {
-        channels.forEach(function(channel) {
-            channel.classList.forEach(function(className) {
-                if(className === 'channel') return;
-                if(className === label) {
-                    channel.classList.remove('hide');
-                }
-                else {
-                    channel.classList.add('hide');
-                }
-            });
+
+    filters.forEach(function(filter) {
+        filter.nextElementSibling.addEventListener('click', function() {
+            filterStreams(this.htmlFor);
         });
+    });
+
+    var _channels = document.getElementsByClassName('channel');
+    var channels = [];
+
+    for (var j = 0, y = _channels.length; j < y; j++) {
+        channels.push(_channels[j]);
+    }
+
+    function filterStreams(label) {
+        if (label === 'all') {
+            channels.forEach(function(channel) {
+                channel.classList.remove('hide');
+            });
+        } else {
+            channels.forEach(function(channel) {
+                channel.classList.forEach(function(className) {
+                    if (className === 'channel') return;
+                    if (className === label) {
+                        channel.classList.remove('hide');
+                    } else {
+                        channel.classList.add('hide');
+                    }
+                });
+            });
+        }
     }
 }
