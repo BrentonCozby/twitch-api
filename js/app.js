@@ -80,12 +80,7 @@ function makeRow(stream) {
 
 
 function addClickHandlers() {
-    var _filters = document.getElementsByTagName('input');
-    var filters = [];
-
-    for (var i = 0, x = _filters.length; i < x; i++) {
-        filters.push(_filters[i]);
-    }
+    var filters = [].slice.call(document.querySelectorAll('input'));
 
     filters.forEach(function(filter) {
         filter.nextElementSibling.addEventListener('click', function() {
@@ -93,12 +88,7 @@ function addClickHandlers() {
         });
     });
 
-    var _channels = document.getElementsByClassName('channel');
-    var channels = [];
-
-    for (var j = 0, y = _channels.length; j < y; j++) {
-        channels.push(_channels[j]);
-    }
+    var channels = [].slice.call(document.querySelectorAll('.channel'));
 
     function filterStreams(label) {
         if (label === 'all') {
